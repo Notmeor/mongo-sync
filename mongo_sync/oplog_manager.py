@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import os
 import datetime
 import time
 import threading
+import logging
 
 import pymongo
 
@@ -10,8 +12,11 @@ from mongo_sync.utils import timeit, dt2ts
 from mongo_sync.store import MongoOplogStore as OplogStore
 from mongo_sync.config import conf
 
+LOG = logging.getLogger(__file__)
 
 src_url = conf['src_url']
+
+# TODO: non-intrusive logging
 
 
 class OplogManager(object):
@@ -27,14 +32,14 @@ class OplogManager(object):
 
         self._hungry = False
         self._running = False
-    
+
     def _initialize_slice_range(self, start, interval):
-        
+
         _start = self._oplog.find_one(
             sort=[('$natural', pymongo.ASCENDING)])['ts']
 
         start = start or conf['oplog_start_time']
-        
+
         if start:
             self._start_ts = max(dt2ts(start), _start)
         else:
@@ -42,13 +47,18 @@ class OplogManager(object):
 
         # incrementing
         last_saved_ts = self.get_last_saved_ts()
+
+        LOG.info('Last saved ts={}'.format(last_saved_ts))
+
         if self._start_ts < last_saved_ts:
             self._start_ts = last_saved_ts
 
         self._last_ts = None
-        
+
         interval = interval or conf['oplog_dump_interval']
         self._slice_interval = datetime.timedelta(minutes=interval)
+
+        LOG.info('Initial ts={}, interval={}'.format(self._start_ts, interval))
 
     @timeit
     def save_sliced(self, sliced):
@@ -82,6 +92,8 @@ class OplogManager(object):
         self._last_ts = sliced[-1]['ts']
         self.save_sliced(sliced)
 
+        LOG.info('Dumped size={}, ts={}'.format(len(sliced), self._last_ts))
+
     def run_dumping(self):
 
         while self._running:
@@ -96,17 +108,22 @@ class OplogManager(object):
 
             if latest_ts < self._next_ts:
                 self._hungry = True
+                LOG.info('Hungry, waiting feed...')
                 time.sleep(self._next_ts.time - latest_ts.time)
             else:
                 if self._hungry:
                     self._next_ts = latest_ts
                     self._hungry = False
                 self.slice_oplog()
+        
+        LOG.info('Stopped.')
 
     def start(self):
         self._running = True
         self._thread = threading.Thread(target=self.run_dumping)
         self._thread.start()
+        LOG.info('Started process={}, dumping thread={}'.format(
+                os.getpid(), self._thread.ident))
 
     def stop(self):
         self._running = False

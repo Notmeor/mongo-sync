@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 import logging
 import pymongo
 
@@ -10,7 +12,7 @@ import time
 
 from bson import SON
 
-from mongo_sync.utils import (timeit, dt2ts, ts_to_slice_name,
+from mongo_sync.utils import (timeit, dt2ts, ts2localtime, ts_to_slice_name,
                               slice_name_to_ts, namespace_to_regex)
 from mongo_sync.store import MongoOplogStore as OplogStore
 from mongo_sync.config import conf
@@ -38,21 +40,30 @@ class OplogReader(object):
 
     def replay(self, oplog):
         for n, entry in enumerate(oplog):
+            # TODO: log excep
             self.docman.process(entry)
         self._last_ts = entry['ts']
+        LOG.info('Current progress={}'.format(ts2localtime(self._last_ts)))
 
     def run(self):
         while self._running:
+            LOG.info('Loading ts={}'.format(self._last_ts))
             oplog = self.load_oplog()
+            
             if oplog is None:
                 time.sleep(60)
+                LOG.info('Loaded None')
             else:
+                LOG.info('Loaded ts={}, size={}'.format(
+                    self._last_ts, len(oplog)))
                 self.replay(oplog)
 
     def start(self):
         self._running = True
         self._thread = threading.Thread(target=self.run)
         self._thread.start()
+        LOG.info('Started process={}, syncing thread={}'.format(
+            os.getpid(), self._thread.ident))
 
 
 class DocManager(object):
@@ -77,6 +88,9 @@ class DocManager(object):
                 self._blacklist_regex.append(ns_regex)
         else:
             self.should_sync = lambda x: True
+
+        LOG.info('Whitelist: {}, blacklist: {}'.format(
+            self._whitelist, self._blacklist))
 
     def is_in_whitelist(self, entry):
         for regex in self._whitelist_regex:

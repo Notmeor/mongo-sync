@@ -12,8 +12,6 @@ from mongo_sync.utils import (timeit, dt2ts, ts_to_slice_name,
 
 from mongo_sync.config import conf
 
-LOG = logging.getLogger(__file__)
-
 src_url = conf['src_url']
 
 oplog_store_db = conf['oplog_store_db']
@@ -25,7 +23,7 @@ class OplogStore(object):
 
     NOTE
     ----------
-    oplog切片命名规则：Timstamp.time_Timstamp.inc
+    oplog切片命名规则：Timstamp.time_Timstamp.inc (切片末尾时间戳)
     """
 
     def get_last_saved_ts(self):
@@ -68,10 +66,8 @@ class MongoOplogStore(OplogStore):
                     break
 
             if cur_name is None:
-                LOG.warning('No more docs')
                 cur_slice = None
             else:
-                LOG.info('Loading slice {}'.format(cur_name))
                 cur_slice = store.read(cur_name)
 
         return cur_slice

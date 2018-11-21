@@ -1,0 +1,44 @@
+2018-11-21 20:23:18,870 - MainThread - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_manager.py - <stdin>:1 - INFO - haha
+2018-11-21 21:11:06,236 - MainThread - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:90 - INFO - Whitelist: ['fund_report_manager.heartbeat'], blacklist: []
+2018-11-21 21:11:30,111 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542594600, 0)
+2018-11-21 21:11:35,193 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:52 - INFO - Loaded ts=Timestamp(1542594600, 0), size=71253
+2018-11-21 21:11:35,479 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:46 - INFO - Current progress=2018-11-20 07:21:36+08:00
+2018-11-21 21:11:35,479 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542669696, 1)
+2018-11-21 21:18:00,803 - MainThread - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:93 - INFO - Whitelist: ['fund_report_manager.heartbeat'], blacklist: []
+2018-11-21 21:18:06,895 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542594600, 0)
+2018-11-21 21:18:06,895 - MainThread - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:66 - INFO - Started process=17199, syncing thread=123145456603136
+2018-11-21 21:18:06,924 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:58 - INFO - Loaded ts=Timestamp(1542594600, 0), size=57
+2018-11-21 21:18:07,038 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:46 - INFO - Current progress=2018-11-20 08:31:07+08:00
+2018-11-21 21:18:07,038 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542673867, 1)
+2018-11-21 21:19:07,061 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:55 - INFO - Loaded None
+2018-11-21 21:19:07,061 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542673867, 1)
+2018-11-21 21:19:07,089 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:58 - INFO - Loaded ts=Timestamp(1542673867, 1), size=57
+2018-11-21 21:19:07,168 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:46 - INFO - Current progress=2018-11-20 08:50:59+08:00
+2018-11-21 21:19:07,168 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542675059, 1)
+2018-11-21 21:20:07,192 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:55 - INFO - Loaded None
+2018-11-21 21:20:07,193 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542675059, 1)
+2018-11-21 21:20:07,218 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:58 - INFO - Loaded ts=Timestamp(1542675059, 1), size=57
+2018-11-21 21:20:07,302 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:46 - INFO - Current progress=2018-11-20 09:00:55+08:00
+2018-11-21 21:20:07,302 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542675655, 1)
+2018-11-21 21:21:07,330 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:55 - INFO - Loaded None
+2018-11-21 21:21:07,331 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542675655, 1)
+2018-11-21 21:22:07,362 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:55 - INFO - Loaded None
+2018-11-21 21:22:07,363 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542675655, 1)
+2018-11-21 21:22:07,393 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:58 - INFO - Loaded ts=Timestamp(1542675655, 1), size=57
+2018-11-21 21:22:07,484 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:46 - INFO - Current progress=2018-11-20 09:10:50+08:00
+2018-11-21 21:22:07,484 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542676250, 1)
+2018-11-21 21:23:07,512 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:55 - INFO - Loaded None
+2018-11-21 21:23:07,512 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542676250, 1)
+2018-11-21 21:23:07,540 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:58 - INFO - Loaded ts=Timestamp(1542676250, 1), size=57
+2018-11-21 21:23:07,617 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:46 - INFO - Current progress=2018-11-20 09:30:42+08:00
+2018-11-21 21:23:07,617 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542677442, 1)
+2018-11-21 21:24:07,658 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:55 - INFO - Loaded None
+2018-11-21 21:24:07,658 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542677442, 1)
+2018-11-21 21:24:07,699 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:58 - INFO - Loaded ts=Timestamp(1542677442, 1), size=57
+2018-11-21 21:24:07,794 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:46 - INFO - Current progress=2018-11-20 09:40:38+08:00
+2018-11-21 21:24:07,794 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542678038, 1)
+2018-11-21 21:25:07,822 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:55 - INFO - Loaded None
+2018-11-21 21:25:07,823 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542678038, 1)
+2018-11-21 21:25:07,851 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:58 - INFO - Loaded ts=Timestamp(1542678038, 1), size=57
+2018-11-21 21:25:07,925 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:46 - INFO - Current progress=2018-11-20 09:50:34+08:00
+2018-11-21 21:25:07,925 - Thread-2 - /Users/eisenheim/Documents/git/mongo-sync/mongo_sync/oplog_reader.py - oplog_reader.py:50 - INFO - Loading ts=Timestamp(1542678634, 1)
