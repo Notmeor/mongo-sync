@@ -1,22 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import os
+import yaml
 
-src_url = 'mongodb://pftz:Pftz8888@192.168.211.190:27017'
-dst_url = 'mongodb://192.168.211.169:27017'
+config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
 
-
-whilelist = [
-    'fund_report_manager.heartbeat',
-    'arctic_test_oplog.*',
-    'oplog_slices.*'
-]
-
-blacklist = [
-]
-
-conf = {
-    'src_url': src_url,
-    'dst_url': dst_url,
-    'whitelist': whilelist,
-    'blacklist': blacklist
-}
+with open(config_path, 'r') as f:
+    conf = yaml.safe_load(f)
