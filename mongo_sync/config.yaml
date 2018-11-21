@@ -9,6 +9,13 @@ whitelist: []
 
 blacklist: []
 
+oplog_start_time: 2018-11-01T00:00:00
+
+# minutes between oplog dumping
+oplog_dump_interval: 10
+
+oplog_store_db: 'oplog_slices'
+
 logging:
     version: 1
     disable_existing_loggers: False

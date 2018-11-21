@@ -16,20 +16,29 @@ src_url = conf['src_url']
 
 class OplogManager(object):
 
-    def __init__(self, start=None):
+    def __init__(self, start=None, interval=None):
 
         self._oplog_store = OplogStore()
 
         self._client = pymongo.MongoClient(src_url)
         self._oplog = self._client['local']['oplog.rs']
 
+        self._initialize_slice_range(start, interval)
+
+        self._hungry = False
+        self._running = False
+    
+    def _initialize_slice_range(self, start, interval):
+        
         _start = self._oplog.find_one(
             sort=[('$natural', pymongo.ASCENDING)])['ts']
 
-        if start is None:
-            self._start_ts = _start
-        else:
+        start = start or conf['oplog_start_time']
+        
+        if start:
             self._start_ts = max(dt2ts(start), _start)
+        else:
+            self._start_ts = _start
 
         # incrementing
         last_saved_ts = self.get_last_saved_ts()
@@ -37,10 +46,9 @@ class OplogManager(object):
             self._start_ts = last_saved_ts
 
         self._last_ts = None
-        self._slice_interval = datetime.timedelta(minutes=5)
-
-        self._hungry = False
-        self._running = False
+        
+        interval = interval or conf['oplog_dump_interval']
+        self._slice_interval = datetime.timedelta(minutes=interval)
 
     @timeit
     def save_sliced(self, sliced):
@@ -92,6 +100,7 @@ class OplogManager(object):
             else:
                 if self._hungry:
                     self._next_ts = latest_ts
+                    self._hungry = False
                 self.slice_oplog()
 
     def start(self):

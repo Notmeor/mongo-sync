@@ -16,6 +16,8 @@ LOG = logging.getLogger(__file__)
 
 src_url = conf['src_url']
 
+oplog_store_db = conf['oplog_store_db']
+
 
 class OplogStore(object):
     """
@@ -40,7 +42,7 @@ class MongoOplogStore(OplogStore):
 
     def get_last_saved_ts(self):
 
-        with SimpleFrameMongo(src_url, 'oplog_slices') as store:
+        with SimpleFrameMongo(src_url, oplog_store_db) as store:
             slices = store.list()
             if not slices:
                 return Timestamp(
@@ -54,7 +56,7 @@ class MongoOplogStore(OplogStore):
 
     def load_oplog(self, last_ts):
 
-        with SimpleFrameMongo(src_url, 'oplog_slices') as store:
+        with SimpleFrameMongo(src_url, oplog_store_db) as store:
 
             last_name = ts_to_slice_name(last_ts)
             names = store.list()
@@ -76,6 +78,6 @@ class MongoOplogStore(OplogStore):
 
     def dump_oplog(self, last_ts, oplog):
 
-        with SimpleFrameMongo(src_url, 'oplog_slices') as store:
+        with SimpleFrameMongo(src_url, oplog_store_db) as store:
             name = '{}_{}'.format(last_ts.time, last_ts.inc)
             store.write(name, oplog)
