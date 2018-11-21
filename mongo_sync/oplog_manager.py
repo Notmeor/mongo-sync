@@ -3,47 +3,34 @@
 import datetime
 import time
 import threading
-import re
-import functools
 
 import pymongo
-from bson import Timestamp, ObjectId
-from pandas.io.pickle import pkl
 
-from framemongo import SimpleFrameMongo
-
-
-src_url = 'mongodb://pftz:Pftz8888@192.168.211.190:27017'
-# dst_url = 'mongodb://pftz:Pftz8888@192.168.211.190:27017'
-
-up, mongo_host = src_url.split('@')
-__, username, password = re.split('://|:', up)
-SimpleFrameMongo.config_settings = {
-    'name': 'oplog_slices',
-    'mongo_host': mongo_host,
-    'username': username,
-    'password': password
-}
+from mongo_sync.utils import timeit, dt2ts
+from mongo_sync.store import MongoOplogStore as OplogStore
+from mongo_sync.config import conf
 
 
+src_url = conf['src_url']
 
-def dt2ts(dt):
-    return Timestamp(int(dt.timestamp()), 0)
 
 class OplogManager(object):
 
     def __init__(self, start=None):
+
+        self._oplog_store = OplogStore()
+
         self._client = pymongo.MongoClient(src_url)
         self._oplog = self._client['local']['oplog.rs']
 
         _start = self._oplog.find_one(
             sort=[('$natural', pymongo.ASCENDING)])['ts']
-        
+
         if start is None:
             self._start_ts = _start
         else:
             self._start_ts = max(dt2ts(start), _start)
-            
+
         # incrementing
         last_saved_ts = self.get_last_saved_ts()
         if self._start_ts < last_saved_ts:
@@ -57,23 +44,11 @@ class OplogManager(object):
 
     @timeit
     def save_sliced(self, sliced):
-        with SimpleFrameMongo() as conn:
-            last_dt = self._last_ts
-            name = '{}_{}'.format(last_dt.time, last_dt.inc)
-            conn.write(name, sliced)
+        self._oplog_store.dump_oplog(self._last_ts, sliced)
 
     def get_last_saved_ts(self):
-        with SimpleFrameMongo() as conn:
-            slices = conn.list()
-            if not slices:
-                return Timestamp(
-                    int(datetime.datetime(1970, 1, 1, 8).timestamp()), 0)
+        return self._oplog_store.get_last_saved_ts()
 
-            last_slice = max(slices)
-            time, inc = last_slice.split('_')
-            last_ts = Timestamp(int(time), int(inc))
-        return last_ts
-            
     def get_latest_ts(self):
         return self._oplog.find_one(
             {'op': {'$ne': 'n'}}, sort=[('$natural', pymongo.DESCENDING)]
@@ -82,8 +57,6 @@ class OplogManager(object):
     def slice_oplog(self):
         @timeit
         def get_cursor():
-
-    
             query = {'op': {'$ne': 'n'},
                      'ts': {'$gt': self._last_ts, '$lte': self._next_ts}}
             cursor = self._oplog.find(
@@ -97,24 +70,22 @@ class OplogManager(object):
 
         if not sliced:
             time.sleep(10)
-        
+
         self._last_ts = sliced[-1]['ts']
         self.save_sliced(sliced)
-
-        
 
     def run_dumping(self):
 
         while self._running:
-            
+
             if self._last_ts is None:
                 self._last_ts = self._start_ts
-    
-            self._next_ts = dt2ts(self._last_ts.as_datetime() + 
+
+            self._next_ts = dt2ts(self._last_ts.as_datetime() +
                                   self._slice_interval)
-        
+
             latest_ts = self.get_latest_ts()
-            
+
             if latest_ts < self._next_ts:
                 self._hungry = True
                 time.sleep(self._next_ts.time - latest_ts.time)
@@ -127,8 +98,6 @@ class OplogManager(object):
         self._running = True
         self._thread = threading.Thread(target=self.run_dumping)
         self._thread.start()
-    
+
     def stop(self):
         self._running = False
-
-

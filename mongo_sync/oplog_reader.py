@@ -7,68 +7,26 @@ import threading
 import datetime
 import dateutil
 import time
-import re
 
-from bson import SON, Timestamp, ObjectId
+from bson import SON
 
-from framemongo import SimpleFrameMongo
-
-logging.basicConfig(level='DEBUG',
-                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                    datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename='parser_result.log',
-                    filemode='w')
+from mongo_sync.utils import (timeit, dt2ts, ts_to_slice_name,
+                              slice_name_to_ts, namespace_to_regex)
+from mongo_sync.store import MongoOplogStore as OplogStore
+from mongo_sync.config import conf
 
 LOG = logging.getLogger(__file__)
 
-docman = None
-
-src_url = 'mongodb://pftz:Pftz8888@192.168.211.190:27017'
-dst_url = 'mongodb://192.168.211.169:27017'
-
-up, mongo_host = src_url.split('@')
-__, username, password = re.split('://|:', up)
-SimpleFrameMongo.config_settings = {
-    'name': 'oplog_slices',
-    'mongo_host': mongo_host,
-    'username': username,
-    'password': password
-}
-
-whilelist = [
-    'fund_report_manager.heartbeat'
-]
-
-blacklist = [
-]
-
-conf = {
-    'src_url': src_url,
-    'dst_url': dst_url,
-    'whitelist': whilelist,
-    'blacklist': blacklist
-}
-
-# TODO: gridfs
-
-
-def ts_to_slice_name(ts):
-    return '{}_{}'.format(ts.time, ts.inc)
-
-
-def slice_name_to_ts(name):
-    time, inc = name.split('_')
-    ts = Timestamp(time=int(time), inc=int(inc))
-    return ts
-
-
-def dt2ts(dt):
-    return Timestamp(int(dt.timestamp()), 0)
+src_url = conf['src_url']
+dst_url = conf['dst_url']
 
 
 class OplogReader(object):
 
     def __init__(self, start):
+
+        self._oplog_store = OplogStore()
+
         self._running = False
         _dt = dateutil.parser.parse(start)
         self._last_ts = dt2ts(_dt)
@@ -76,26 +34,7 @@ class OplogReader(object):
         self.docman = DocManager()
 
     def load_oplog(self):
-
-        with SimpleFrameMongo() as conn:
-            last_name = ts_to_slice_name(self._last_ts)
-            names = conn.list()
-            cur_name = None
-            for n in names:
-                if n > last_name:
-                    cur_name = n
-                    break
-
-            if cur_name is None:
-                LOG.warning('No more docs')
-                cur_slice = None
-            else:
-                LOG.info('Loading slice {}'.format(cur_name))
-                print('Loading slice {}'.format(cur_name))
-                self._oplog = cur_slice = conn.read(cur_name)
-                print('Loaded slice {}'.format(cur_name))
-
-        return cur_slice
+        return self._oplog_store.load_oplog(self._last_ts)
 
     def replay(self, oplog):
         for n, entry in enumerate(oplog):
@@ -115,7 +54,7 @@ class OplogReader(object):
         self._thread = threading.Thread(target=self.run)
         self._thread.start()
 
-commands = []
+
 class DocManager(object):
 
     def __init__(self):
@@ -124,24 +63,38 @@ class DocManager(object):
         self._blacklist = conf['blacklist']
 
         if self._whitelist:
+            self._whitelist_regex = []
+            for ns in self._whitelist:
+                ns_regex = namespace_to_regex(ns)
+                self._whitelist_regex.append(ns_regex)
+
             self._should_sync = self.is_in_whitelist
         elif self._blacklist:
             self._should_sync = self.skip_blacklist
+            self._blacklist_regex = []
+            for ns in self._blacklist:
+                ns_regex = namespace_to_regex(ns)
+                self._blacklist_regex.append(ns_regex)
         else:
             self.should_sync = lambda x: True
 
     def is_in_whitelist(self, entry):
-        if entry['ns'] in self._whitelist:
-            return True
+        for regex in self._whitelist_regex:
+            if regex.match(entry['ns']):
+                return True
         return False
 
     def skip_blacklist(self, entry):
-        if entry['ns'] in self._blacklist:
-            return False
+        for regex in self._blacklist_regex:
+            if regex.match(entry['ns']):
+                return True
         return True
 
     def should_sync(self, entry):
         db, coll = entry['ns'].split('.', 1)
+        # ignore system.indexes
+        if coll.startswith("system."):
+            return False
         if coll == "$cmd":
             return True
         return self._should_sync(entry)
@@ -203,8 +156,7 @@ class DocManager(object):
             {'_id': doc['_id']})
 
     def handle_command(self, entry):
-        print(entry)
-        commands.append(entry)
+
         doc = entry['o']
         if doc.get('dropDatabase'):
             db_name = entry['ns'].split('.', 1)[0]
@@ -220,7 +172,7 @@ class DocManager(object):
         if doc.get('create'):
             new_db, coll = doc['idIndex']['ns'].split('.', 1)
             if new_db:
-                self.mongo[new_db].create_collection(coll)
+                self.mongo[new_db].command(SON(doc))
 
         if doc.get('drop'):
             new_db, coll = doc['idIndex']['ns'].split('.', 1)
