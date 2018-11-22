@@ -67,7 +67,7 @@ class OplogManager(object):
         if slice_names:
             first_name = min(slice_names)
             first_dt = ts2localtime(slice_name_to_ts(first_name))
-            print('first_dt: {}'.format(first_dt))
+
             if (datetime.date.today() - first_dt.date()).days > keep_days:
                 self._oplog_store.remove(first_name)
                 LOG.info('Removed slice {}'.format(first_name))
@@ -90,7 +90,7 @@ class OplogManager(object):
         )['ts']
 
     def slice_oplog(self):
-        @timeit
+
         def get_cursor():
             query = {'op': {'$ne': 'n'},
                      'ts': {'$gt': self._last_ts, '$lte': self._next_ts}}
@@ -114,7 +114,6 @@ class OplogManager(object):
     def run_dumping(self):
 
         while self._running:
-            print('before get_cusor')
             self.remove_expiration()
 
             if self._last_ts is None:
