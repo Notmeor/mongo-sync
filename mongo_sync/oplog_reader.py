@@ -41,7 +41,7 @@ class OplogReader(object):
             if oplog[0]['ts'] < self._last_ts:
                 for n, entry in enumerate(oplog):
                     if entry['ts'] >= self._last_ts:
-                        continue
+                        break
                 oplog = oplog[n:]
             return oplog
         else:
