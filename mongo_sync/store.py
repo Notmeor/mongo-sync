@@ -57,7 +57,7 @@ class MongoOplogStore(OplogStore):
         with SimpleFrameMongo(src_url, oplog_store_db) as store:
 
             last_name = ts_to_slice_name(last_ts)
-            names = store.list()
+            names = sorted(store.list())
             cur_name = None
 
             for n in names:

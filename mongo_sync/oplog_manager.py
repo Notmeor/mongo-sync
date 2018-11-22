@@ -122,7 +122,7 @@ class OplogManager(object):
         self._running = True
         self._thread = threading.Thread(target=self.run_dumping)
         self._thread.start()
-        LOG.info('Started process={}, dumping thread={}'.format(
+        LOG.info('Started pid={}, dumping thread={}'.format(
                 os.getpid(), self._thread.ident))
 
     def stop(self):

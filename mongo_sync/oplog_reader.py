@@ -42,14 +42,20 @@ class OplogReader(object):
         for n, entry in enumerate(oplog):
             # TODO: log excep
             self.docman.process(entry)
+#            try:
+#                self.docman.process(entry)
+#            except:
+#                LOG.info('Failed to process {}'.format(entry), exc_info=True)
+#                import pdb;pdb.set_trace
         self._last_ts = entry['ts']
         LOG.info('Current progress={}'.format(ts2localtime(self._last_ts)))
 
     def run(self):
         while self._running:
-            LOG.info('Loading ts={}'.format(self._last_ts))
+            LOG.info('Loading ts={}, last progress={}'.format(
+                self._last_ts, ts2localtime(self._last_ts)))
             oplog = self.load_oplog()
-            
+
             if oplog is None:
                 time.sleep(60)
                 LOG.info('Loaded None')
@@ -62,7 +68,7 @@ class OplogReader(object):
         self._running = True
         self._thread = threading.Thread(target=self.run)
         self._thread.start()
-        LOG.info('Started process={}, syncing thread={}'.format(
+        LOG.info('Started pid={}, syncing thread={}'.format(
             os.getpid(), self._thread.ident))
 
 
@@ -134,7 +140,10 @@ class DocManager(object):
 
         # Command
         elif operation == 'c':
-            self.handle_command(entry)
+            try:
+                self.handle_command(entry)
+            except pymongo.errors.OperationFailure as e:
+                LOG.warning('Command failed: {}'.format(e))
 
     def insert(self, entry):
         doc = entry['o']
@@ -171,6 +180,7 @@ class DocManager(object):
 
     def handle_command(self, entry):
 
+        # TODO: filter by blacklist/whitelist
         doc = entry['o']
         if doc.get('dropDatabase'):
             db_name = entry['ns'].split('.', 1)[0]
@@ -189,6 +199,7 @@ class DocManager(object):
                 self.mongo[new_db].command(SON(doc))
 
         if doc.get('drop'):
-            new_db, coll = doc['idIndex']['ns'].split('.', 1)
-            if new_db:
-                self.mongo[new_db].drop_collection(coll)
+            db_name = entry['ns'].split('.', 1)[0]
+            coll = doc['drop']
+            if db_name:
+                self.mongo[db_name].drop_collection(coll)
