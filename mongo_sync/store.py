@@ -12,10 +12,6 @@ from mongo_sync.utils import (timeit, dt2ts, ts_to_slice_name,
 
 from mongo_sync.config import conf
 
-src_url = conf['src_url']
-
-oplog_store_db = conf['oplog_store_db']
-
 
 class OplogStore(object):
     """
@@ -25,6 +21,12 @@ class OplogStore(object):
     ----------
     oplog切片命名规则：Timstamp.time_Timstamp.inc (切片末尾时间戳)
     """
+
+    def list_names(self):
+        raise NotImplementedError
+
+    def remove(self):
+        raise NotImplementedError
 
     def get_last_saved_ts(self):
         raise NotImplementedError
@@ -36,11 +38,25 @@ class OplogStore(object):
         raise NotImplementedError
 
 
+store_url = conf['oplog_store_url']
+
+oplog_store_db = conf['oplog_store_db']
+
+
 class MongoOplogStore(OplogStore):
+
+    def list_names(self):
+        with SimpleFrameMongo(store_url, oplog_store_db) as store:
+            slice_names = store.list()
+        return slice_names
+
+    def remove(self, slice_name):
+        with SimpleFrameMongo(store_url, oplog_store_db) as store:
+            store.delete(slice_name)
 
     def get_last_saved_ts(self):
 
-        with SimpleFrameMongo(src_url, oplog_store_db) as store:
+        with SimpleFrameMongo(store_url, oplog_store_db) as store:
             slices = store.list()
             if not slices:
                 return Timestamp(
@@ -54,7 +70,7 @@ class MongoOplogStore(OplogStore):
 
     def load_oplog(self, last_ts):
 
-        with SimpleFrameMongo(src_url, oplog_store_db) as store:
+        with SimpleFrameMongo(store_url, oplog_store_db) as store:
 
             last_name = ts_to_slice_name(last_ts)
             names = sorted(store.list())
@@ -74,6 +90,6 @@ class MongoOplogStore(OplogStore):
 
     def dump_oplog(self, last_ts, oplog):
 
-        with SimpleFrameMongo(src_url, oplog_store_db) as store:
+        with SimpleFrameMongo(store_url, oplog_store_db) as store:
             name = '{}_{}'.format(last_ts.time, last_ts.inc)
             store.write(name, oplog)

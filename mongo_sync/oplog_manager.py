@@ -8,13 +8,15 @@ import logging
 
 import pymongo
 
-from mongo_sync.utils import timeit, dt2ts
+from mongo_sync.utils import timeit, dt2ts, slice_name_to_ts, ts2localtime
 from mongo_sync.store import MongoOplogStore as OplogStore
 from mongo_sync.config import conf
 
 LOG = logging.getLogger(__file__)
 
 src_url = conf['src_url']
+
+keep_days = conf['keep_days']
 
 # TODO: non-intrusive logging
 
@@ -35,8 +37,7 @@ class OplogManager(object):
 
     def _initialize_slice_range(self, start, interval):
 
-        _start = self._oplog.find_one(
-            sort=[('$natural', pymongo.ASCENDING)])['ts']
+        _start = self.get_first_ts()
 
         start = start or conf['oplog_start_time']
 
@@ -60,12 +61,28 @@ class OplogManager(object):
 
         LOG.info('Initial ts={}, interval={}'.format(self._start_ts, interval))
 
+    def remove_expiration(self):
+        slice_names = self._oplog_store.list_names()
+
+        if slice_names:
+            first_name = min(slice_names)
+            first_dt = ts2localtime(slice_name_to_ts(first_name))
+            print('first_dt: {}'.format(first_dt))
+            if (datetime.date.today() - first_dt.date()).days > keep_days:
+                self._oplog_store.remove(first_name)
+                LOG.info('Removed slice {}'.format(first_name))
+
     @timeit
     def save_sliced(self, sliced):
         self._oplog_store.dump_oplog(self._last_ts, sliced)
 
     def get_last_saved_ts(self):
         return self._oplog_store.get_last_saved_ts()
+
+    def get_first_ts(self):
+        return self._oplog.find_one(
+            {'op': {'$ne': 'n'}}, sort=[('$natural', pymongo.ASCENDING)]
+        )['ts']
 
     def get_latest_ts(self):
         return self._oplog.find_one(
@@ -97,6 +114,8 @@ class OplogManager(object):
     def run_dumping(self):
 
         while self._running:
+            print('before get_cusor')
+            self.remove_expiration()
 
             if self._last_ts is None:
                 self._last_ts = self._start_ts
@@ -115,7 +134,7 @@ class OplogManager(object):
                     self._next_ts = latest_ts
                     self._hungry = False
                 self.slice_oplog()
-        
+
         LOG.info('Stopped.')
 
     def start(self):
