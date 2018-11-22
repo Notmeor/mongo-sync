@@ -72,7 +72,6 @@ class OplogManager(object):
                 self._oplog_store.remove(first_name)
                 LOG.info('Removed slice {}'.format(first_name))
 
-    @timeit
     def save_sliced(self, sliced):
         self._oplog_store.dump_oplog(self._last_ts, sliced)
 

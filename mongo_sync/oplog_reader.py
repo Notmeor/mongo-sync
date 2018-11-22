@@ -42,11 +42,7 @@ class OplogReader(object):
         for n, entry in enumerate(oplog):
             # TODO: log excep
             self.docman.process(entry)
-#            try:
-#                self.docman.process(entry)
-#            except:
-#                LOG.info('Failed to process {}'.format(entry), exc_info=True)
-#                import pdb;pdb.set_trace
+
         self._last_ts = entry['ts']
         LOG.info('Current progress={}'.format(ts2localtime(self._last_ts)))
 
@@ -57,8 +53,8 @@ class OplogReader(object):
             oplog = self.load_oplog()
 
             if oplog is None:
-                time.sleep(60)
-                LOG.info('Loaded None')
+                LOG.info('Loaded None. No more oplog to sync.')
+                time.sleep(10)
             else:
                 LOG.info('Loaded ts={}, size={}'.format(
                     self._last_ts, len(oplog)))
