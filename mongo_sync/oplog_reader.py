@@ -36,7 +36,16 @@ class OplogReader(object):
         self.docman = DocManager()
 
     def load_oplog(self):
-        return self._oplog_store.load_oplog(self._last_ts)
+        oplog = self._oplog_store.load_oplog(self._last_ts)
+        if oplog:
+            if oplog[0]['ts'] < self._last_ts:
+                for n, entry in enumerate(oplog):
+                    if entry['ts'] >= self._last_ts:
+                        continue
+                oplog = oplog[n:]
+            return oplog
+        else:
+            return None
 
     def replay(self, oplog):
         for n, entry in enumerate(oplog):
