@@ -69,12 +69,19 @@ class OplogReader(object):
                     self._last_ts, len(oplog)))
                 self.replay(oplog)
 
+        LOG.warning('Oplog syncing stopped.')
+
     def start(self):
+        LOG.warning('Oplog syncing starting...')
         self._running = True
         self._thread = threading.Thread(target=self.run)
         self._thread.start()
         LOG.info('Started pid={}, syncing thread={}'.format(
             os.getpid(), self._thread.ident))
+
+    def safe_stop(self):
+        self._running = False
+        LOG.warning('Would stop as soon as current slice syncing completes.')
 
 
 class DocManager(object):

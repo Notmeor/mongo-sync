@@ -142,5 +142,6 @@ class OplogManager(object):
         LOG.info('Started pid={}, dumping thread={}'.format(
                 os.getpid(), self._thread.ident))
 
-    def stop(self):
+    def safe_stop(self):
         self._running = False
+        LOG.warning('Would stop as soon as current slice dumping completes.')
