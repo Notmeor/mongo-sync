@@ -61,6 +61,10 @@ class OplogManager(object):
 
         LOG.info('Initial ts={}, interval={}'.format(self._start_ts, interval))
 
+    @property
+    def is_running(self):
+        return self._running
+
     def remove_expiration(self):
         slice_names = self._oplog_store.list_names()
 
@@ -133,7 +137,7 @@ class OplogManager(object):
                     self._hungry = False
                 self.slice_oplog()
 
-        LOG.info('Stopped.')
+        LOG.warning('Oplog dumping stopped.')
 
     def start(self):
         self._running = True

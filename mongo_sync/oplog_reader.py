@@ -25,15 +25,24 @@ dst_url = conf['dst_url']
 
 class OplogReader(object):
 
-    def __init__(self, start):
+    def __init__(self, start=None):
 
         self._oplog_store = OplogStore()
 
         self._running = False
-        _dt = dateutil.parser.parse(start)
-        self._last_ts = dt2ts(_dt)
+
+        start = start or conf['sync_start_time']
+        if not isinstance(start, datetime.datetime):
+            raise TypeError('Expect datetime.datetime, got {}'.format(
+                    type(start)))
+
+        self._last_ts = dt2ts(start)
 
         self.docman = DocManager()
+
+    @property
+    def is_running(self):
+        return self._running
 
     def load_oplog(self):
         oplog = self._oplog_store.load_oplog(self._last_ts)

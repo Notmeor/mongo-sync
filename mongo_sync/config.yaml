@@ -11,12 +11,17 @@ blacklist: []
 
 oplog_start_time: 2018-11-01T00:00:00
 
+sync_start_time: 
+
 # minutes between oplog dumping
 oplog_dump_interval: 10
 
 oplog_store_url: ''
 
 oplog_store_db: 'oplog_store'
+
+# days of oplog to keep
+keep_days: 2
 
 logging:
     version: 1
