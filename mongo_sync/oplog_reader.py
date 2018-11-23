@@ -59,7 +59,11 @@ class OplogReader(object):
 
     @property
     def is_running(self):
-        return self._running
+        if not self._running:
+            return False
+        if not self._thread.is_alive():
+            return False
+        return True
 
     def load_oplog(self):
         oplog = self._oplog_store.load_oplog(self._last_ts)

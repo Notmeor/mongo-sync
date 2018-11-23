@@ -63,7 +63,11 @@ class OplogManager(object):
 
     @property
     def is_running(self):
-        return self._running
+        if not self._running:
+            return False
+        if not self._thread.is_alive():
+            return False
+        return True
 
     def remove_expiration(self):
         slice_names = self._oplog_store.list_names()
