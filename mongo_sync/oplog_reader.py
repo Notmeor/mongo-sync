@@ -35,7 +35,7 @@ class OplogReader(object):
 
         self.docman = DocManager()
 
-    def _initialize_start_time(self, start)
+    def _initialize_start_time(self, start):
         start = start or conf['sync_start_time']
         if not isinstance(start, datetime.datetime):
             raise TypeError('Expect datetime.datetime, got {}'.format(
