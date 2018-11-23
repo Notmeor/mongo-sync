@@ -73,7 +73,7 @@ class OplogReader(object):
         else:
             return None
 
-    def set_tag_file(self, ts=None):
+    def write_tag_file(self, ts=None):
         if ts is None:
             tag = '-1'
         else:
@@ -96,14 +96,15 @@ class OplogReader(object):
 
     def replay(self, oplog):
 
-        self.set_tag_file()
+        # Set tag to negative state each time before replay 
+        self.write_tag_file()
 
         for entry in oplog:
             # TODO: log excep
             self.docman.process(entry)
 
         self._last_ts = entry['ts']
-        self.set_tag_file(self._last_ts)
+        self.write_tag_file(self._last_ts)
 
         LOG.info('Current progress={}'.format(ts2localtime(self._last_ts)))
 
