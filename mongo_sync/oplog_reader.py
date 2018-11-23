@@ -10,6 +10,8 @@ import datetime
 import dateutil
 import time
 
+from 
+
 from bson import SON
 
 from mongo_sync.utils import (timeit, dt2ts, ts2localtime, ts_to_slice_name,
@@ -31,14 +33,31 @@ class OplogReader(object):
 
         self._running = False
 
+        self._initialize_start_time(start)
+
+        self.docman = DocManager()
+
+    def _initialize_start_time(self, start)
         start = start or conf['sync_start_time']
         if not isinstance(start, datetime.datetime):
             raise TypeError('Expect datetime.datetime, got {}'.format(
                     type(start)))
 
         self._last_ts = dt2ts(start)
-
-        self.docman = DocManager()
+        sync_tag = self.read_tag_file()
+        if sync_tag == -1:
+            err_msg = 'Sync process crashed last time,' +\
+                'have to manually restore db state'
+            LOG.warning(err_msg)
+            raise Exception(err_msg)
+        elif sync_tag is not None:
+            if sync_tag >= self._last_ts:
+                self._last_ts = sync_tag
+                LOG.warning('Read start timestamp from tag file')
+            else:
+                err_msg = 'Start timestamp larger than sync tag, delete tag file first'
+                LOG.warning(err_msg)
+                raise Exception(err_msg)
 
     @property
     def is_running(self):
@@ -56,12 +75,38 @@ class OplogReader(object):
         else:
             return None
 
+    def set_tag_file(self, ts=None):
+        if ts is None:
+            tag = '-1'
+        else:
+            tag = '{}_{}={}'.format(ts.time, ts.inc, ts2localtime(ts))
+        with open('last_timestamp', 'w') as f:
+            f.write(tag)
+    
+    def read_tag_file(self):
+        fname = 'last_timestamp'
+        if os.path.exists(fname):
+            with open('last_timestamp', 'r') as f:
+                tag = f.read()
+            
+            if tag == '-1':
+                return -1
+            _time, _inc = tag.split('=')[0].split('_')
+            ts = Timestamp(int(_time), int(_inc))
+            return ts
+        return None
+
     def replay(self, oplog):
+
+        self.set_tag_file()
+
         for entry in oplog:
             # TODO: log excep
             self.docman.process(entry)
 
         self._last_ts = entry['ts']
+        self.set_tag_file(self._last_ts)
+
         LOG.info('Current progress={}'.format(ts2localtime(self._last_ts)))
 
     def run(self):
