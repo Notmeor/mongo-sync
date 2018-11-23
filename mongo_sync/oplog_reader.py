@@ -10,7 +10,7 @@ import datetime
 import dateutil
 import time
 
-from bson import SON
+from bson import SON, Timestamp
 
 from mongo_sync.utils import (timeit, dt2ts, ts2localtime, ts_to_slice_name,
                               slice_name_to_ts, namespace_to_regex)
@@ -44,7 +44,7 @@ class OplogReader(object):
         self._last_ts = dt2ts(start)
         sync_tag = self.read_tag_file()
         if sync_tag == -1:
-            err_msg = 'Sync process crashed last time,' +\
+            err_msg = 'Sync process crashed last time, ' +\
                 'have to manually restore db state'
             LOG.warning(err_msg)
             raise Exception(err_msg)
