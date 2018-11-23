@@ -57,7 +57,7 @@ class OplogReader(object):
             return None
 
     def replay(self, oplog):
-        for n, entry in enumerate(oplog):
+        for entry in oplog:
             # TODO: log excep
             self.docman.process(entry)
 
@@ -65,18 +65,21 @@ class OplogReader(object):
         LOG.info('Current progress={}'.format(ts2localtime(self._last_ts)))
 
     def run(self):
-        while self._running:
-            LOG.info('Loading ts={}, last progress={}'.format(
-                self._last_ts, ts2localtime(self._last_ts)))
-            oplog = self.load_oplog()
+        try:
+            while self._running:
+                LOG.info('Loading ts={}, last progress={}'.format(
+                    self._last_ts, ts2localtime(self._last_ts)))
+                oplog = self.load_oplog()
 
-            if oplog is None:
-                LOG.info('Loaded None. No more oplog to sync.')
-                time.sleep(10)
-            else:
-                LOG.info('Loaded ts={}, size={}'.format(
-                    self._last_ts, len(oplog)))
-                self.replay(oplog)
+                if oplog is None:
+                    LOG.info('Loaded None. No more oplog to sync.')
+                    time.sleep(10)
+                else:
+                    LOG.info('Loaded ts={}, size={}'.format(
+                        self._last_ts, len(oplog)))
+                    self.replay(oplog)
+        except Exception as e:
+            LOG.error(str(e), exc_info=True)
 
         LOG.warning('Oplog syncing stopped.')
 
@@ -85,7 +88,7 @@ class OplogReader(object):
         self._running = True
         self._thread = threading.Thread(target=self.run)
         self._thread.start()
-        LOG.info('Started pid={}, syncing thread={}'.format(
+        LOG.warning('Started pid={}, syncing thread={}'.format(
             os.getpid(), self._thread.ident))
 
     def safe_stop(self):
