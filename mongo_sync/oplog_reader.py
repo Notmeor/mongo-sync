@@ -10,8 +10,6 @@ import datetime
 import dateutil
 import time
 
-from 
-
 from bson import SON
 
 from mongo_sync.utils import (timeit, dt2ts, ts2localtime, ts_to_slice_name,
