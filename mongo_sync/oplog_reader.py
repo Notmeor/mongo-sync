@@ -78,11 +78,11 @@ class OplogReader(object):
             tag = '-1'
         else:
             tag = '{}_{}={}'.format(ts.time, ts.inc, ts2localtime(ts))
-        with open('last_timestamp', 'w') as f:
+        with open('tag_file', 'w') as f:
             f.write(tag)
     
     def read_tag_file(self):
-        fname = 'last_timestamp'
+        fname = 'tag_file'
         if os.path.exists(fname):
             with open('last_timestamp', 'r') as f:
                 tag = f.read()
