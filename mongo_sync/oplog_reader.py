@@ -84,7 +84,7 @@ class OplogReader(object):
     def read_tag_file(self):
         fname = 'tag_file'
         if os.path.exists(fname):
-            with open('last_timestamp', 'r') as f:
+            with open(fname, 'r') as f:
                 tag = f.read()
             
             if tag == '-1':
