@@ -18,7 +18,7 @@ oplog_dump_interval: 10
 
 oplog_store_url: ''
 
-oplog_store_db: 'oplog_store'
+oplog_store_db: '__oplog_store'
 
 # days of oplog to keep
 keep_days: 2
