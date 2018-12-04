@@ -68,11 +68,13 @@ class OplogReader(object):
     def load_oplog(self):
         oplog = self._oplog_store.load_oplog(self._last_ts)
         if oplog:
-            if oplog[0]['ts'] < self._last_ts:
+            if oplog[0]['ts'] <= self._last_ts:
+                _start = None
                 for n, entry in enumerate(oplog):
-                    if entry['ts'] >= self._last_ts:
+                    if entry['ts'] > self._last_ts:
+                        _start = n
                         break
-                oplog = oplog[n:]
+                oplog = oplog[_start:]
             return oplog
         else:
             return None
