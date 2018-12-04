@@ -75,6 +75,7 @@ class OplogReader(object):
                         _start = n
                         break
                 oplog = oplog[_start:]
+                LOG.warning('Resumed, would start sync from {}'.format(oplog[0]['ts']))
             return oplog
         else:
             return None
