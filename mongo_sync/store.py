@@ -5,6 +5,8 @@ import logging
 
 from bson import Timestamp
 
+import os
+import pandas as pd
 from framemongo import SimpleFrameMongo
 
 from mongo_sync.utils import (timeit, dt2ts, ts_to_slice_name,
@@ -93,3 +95,57 @@ class MongoOplogStore(OplogStore):
         with SimpleFrameMongo(store_url, oplog_store_db) as store:
             name = '{}_{}'.format(last_ts.time, last_ts.inc)
             store.write(name, oplog)
+
+
+class LocalOplogStore(OplogStore):
+    
+    def __init__(self):
+        self.store_path = conf['local_store_path']
+    
+    def list_names(self):
+        return sorted(os.listdir(self.store_path))
+
+    def remove(self, slice_name):
+        pass
+
+    def get_last_saved_ts(self):
+
+        slices = self.list_names()
+        if not slices:
+            return Timestamp(
+                int(datetime.datetime(1970, 1, 2).timestamp()), 0)
+
+        last_slice = max(slices)
+        time, inc = last_slice.split('_')
+        last_ts = Timestamp(int(time), int(inc))
+
+        return last_ts
+
+    def load_oplog(self, last_ts):
+
+        last_name = ts_to_slice_name(last_ts)
+        names = self.list_names()
+        cur_name = None
+
+        for n in names:
+            if n > last_name:
+                cur_name = n
+                break
+
+        if cur_name is None:
+            cur_slice = None
+        else:
+            cur_slice = pd.read_pickle(os.path.join(self.store_path, last_name))
+
+        return cur_slice
+
+    def dump_oplog(self, last_ts, oplog):
+        pass
+
+
+store_type = conf['oplog_store_type']
+
+OplogStore = {
+    'MongoOplogStore': MongoOplogStore,
+    'LocalOplogStore': LocalOplogStore,
+}[store_type]

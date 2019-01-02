@@ -9,7 +9,7 @@ import logging
 import pymongo
 
 from mongo_sync.utils import timeit, dt2ts, slice_name_to_ts, ts2localtime
-from mongo_sync.store import MongoOplogStore as OplogStore
+from mongo_sync.store import OplogStore
 from mongo_sync.config import conf
 
 LOG = logging.getLogger(__file__)
