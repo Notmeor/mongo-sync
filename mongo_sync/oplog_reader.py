@@ -14,7 +14,7 @@ from bson import SON, Timestamp
 
 from mongo_sync.utils import (timeit, dt2ts, ts2localtime, ts_to_slice_name,
                               slice_name_to_ts, namespace_to_regex)
-from mongo_sync.store import MongoOplogStore as OplogStore
+from mongo_sync.store import OplogStore
 from mongo_sync.config import conf
 
 LOG = logging.getLogger(__file__)
