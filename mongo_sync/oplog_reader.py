@@ -57,7 +57,6 @@ class OplogReader(object):
                 LOG.warning(err_msg)
                 raise Exception(err_msg)
 
-    @property
     def is_running(self):
         if not self._running:
             return False

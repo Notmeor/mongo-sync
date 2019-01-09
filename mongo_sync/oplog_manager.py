@@ -61,7 +61,6 @@ class OplogManager(object):
 
         LOG.info('Initial ts={}, interval={}'.format(self._start_ts, interval))
 
-    @property
     def is_running(self):
         if not self._running:
             return False
