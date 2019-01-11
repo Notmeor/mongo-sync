@@ -22,6 +22,8 @@ LOG = logging.getLogger(__file__)
 src_url = conf['src_url']
 dst_url = conf['dst_url']
 
+# TODO: ensure_index
+
 
 class OplogReader(object):
 
