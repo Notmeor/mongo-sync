@@ -119,26 +119,29 @@ class OplogManager(object):
 
     def run_dumping(self):
 
-        while self._running:
-            self.remove_expiration()
+        try:
+            while self._running:
+                self.remove_expiration()
 
-            if self._last_ts is None:
-                self._last_ts = self._start_ts
+                if self._last_ts is None:
+                    self._last_ts = self._start_ts
 
-            self._next_ts = dt2ts(self._last_ts.as_datetime() +
-                                  self._slice_interval)
+                self._next_ts = dt2ts(self._last_ts.as_datetime() +
+                                    self._slice_interval)
 
-            latest_ts = self.get_latest_ts()
+                latest_ts = self.get_latest_ts()
 
-            if latest_ts < self._next_ts:
-                self._hungry = True
-                LOG.info('Hungry, waiting feed...')
-                time.sleep(self._next_ts.time - latest_ts.time)
-            else:
-                if self._hungry:
-                    self._next_ts = latest_ts
-                    self._hungry = False
-                self.slice_oplog()
+                if latest_ts < self._next_ts:
+                    self._hungry = True
+                    LOG.info('Hungry, waiting feed...')
+                    time.sleep(self._next_ts.time - latest_ts.time)
+                else:
+                    if self._hungry:
+                        self._next_ts = latest_ts
+                        self._hungry = False
+                    self.slice_oplog()
+        except Exception as e:
+            LOG.error(str(e), exc_info=True)
 
         LOG.warning('Oplog dumping stopped.')
 
