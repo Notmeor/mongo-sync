@@ -110,7 +110,9 @@ class OplogManager(object):
         sliced = list(cursor)
 
         if not sliced:
+            LOG.info('No more new records. Sleep...')
             time.sleep(10)
+            return
 
         self._last_ts = sliced[-1]['ts']
         self.save_sliced(sliced)
