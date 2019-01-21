@@ -110,8 +110,9 @@ class OplogManager(object):
         sliced = list(cursor)
 
         if not sliced:
-            LOG.info('No more new records. Sleep...')
-            time.sleep(10)
+            LOG.info(f'No oplog records between '
+                     f'{self._last_ts} and {self._next_ts}')
+            self._last_ts = self._next_ts
             return
 
         self._last_ts = sliced[-1]['ts']
