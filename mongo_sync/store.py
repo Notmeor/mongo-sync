@@ -7,7 +7,7 @@ from bson import Timestamp
 
 import os
 import pandas as pd
-from framemongo import SimpleFrameMongo
+from pystore import MongoStore as SimpleFrameMongo
 
 from mongo_sync.utils import (timeit, dt2ts, ts_to_slice_name,
                               slice_name_to_ts, namespace_to_regex)
