@@ -22,8 +22,8 @@ def dump_oplog():
     om = oplog_dump.OplogDump()
     om.start()
 
-    # while om.is_running():
-    #     time.sleep(5)
+    while om.is_running():
+        time.sleep(5)
     
     alert('oplog dump stopped')
 
