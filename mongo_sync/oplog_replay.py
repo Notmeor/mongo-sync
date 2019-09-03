@@ -19,8 +19,6 @@ from mongo_sync.config import conf
 
 LOG = logging.getLogger('oplog_replay')
 
-# TODO: ensure_index
-
 
 class OplogReplay(object):
 

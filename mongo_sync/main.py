@@ -3,6 +3,7 @@ import sys
 import argparse
 import time
 import datetime
+import signal
 
 from mongo_sync import oplog_dump
 from mongo_sync import oplog_replay
@@ -20,6 +21,12 @@ def alert(message):
 
 def dump_oplog():
     om = oplog_dump.OplogDump()
+
+    def exit_on_sigint(sig, frame):
+        om.safe_stop()
+
+    signal.signal(signal.SIGINT, exit_on_sigint)
+
     om.start()
 
     while om.is_running():
@@ -28,11 +35,18 @@ def dump_oplog():
     alert('oplog dump stopped')
 
 
+
 def replay_oplog():
     op = oplog_replay.OplogReplay()
+
+    def exit_on_sigint(sig, frame):
+        op.safe_stop()
+
+    signal.signal(signal.SIGINT, exit_on_sigint)
+
     op.start()
 
-    while True:
+    while op.is_running():
         time.sleep(5)
     
     alert('oplog dump stopped')
