@@ -22,10 +22,11 @@ def alert(message):
 def dump_oplog():
     om = oplog_dump.OplogDump()
 
-    def exit_on_sigint(sig, frame):
+    def exit_on_signal(sig, frame):
         om.safe_stop()
 
-    signal.signal(signal.SIGINT, exit_on_sigint)
+    signal.signal(signal.SIGINT, exit_on_signal)
+    signal.signal(signal.SIGTERM, exit_on_signal)
 
     om.start()
 
@@ -39,10 +40,11 @@ def dump_oplog():
 def replay_oplog():
     op = oplog_replay.OplogReplay()
 
-    def exit_on_sigint(sig, frame):
+    def exit_on_signal(sig, frame):
         op.safe_stop()
 
-    signal.signal(signal.SIGINT, exit_on_sigint)
+    signal.signal(signal.SIGINT, exit_on_signal)
+    signal.signal(signal.SIGTERM, exit_on_signal)
 
     op.start()
 
