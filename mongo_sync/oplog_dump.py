@@ -12,22 +12,18 @@ from mongo_sync.utils import timeit, dt2ts, slice_name_to_ts, ts2localtime
 from mongo_sync.store import OplogStore
 from mongo_sync.config import conf
 
-LOG = logging.getLogger(__file__)
+LOG = logging.getLogger('oplog_dump')
 
-src_url = conf['src_url']
-
-keep_days = conf['keep_days']
-
-# TODO: non-intrusive logging
+OPLOG_KEEP_DAYS = conf['keep_days']
 
 
-class OplogManager(object):
+class OplogDump(object):
 
     def __init__(self, start=None, interval=None):
 
         self._oplog_store = OplogStore()
 
-        self._client = pymongo.MongoClient(src_url)
+        self._client = pymongo.MongoClient(conf['src_url'])
         self._oplog = self._client['local']['oplog.rs']
 
         self._initialize_slice_range(start, interval)
@@ -39,7 +35,7 @@ class OplogManager(object):
 
         _start = self.get_first_ts()
 
-        start = start or conf['oplog_start_time']
+        start = start or conf['dump_start_time']
 
         if start:
             self._start_ts = max(dt2ts(start), _start)
@@ -75,7 +71,7 @@ class OplogManager(object):
             first_name = min(slice_names)
             first_dt = ts2localtime(slice_name_to_ts(first_name))
 
-            if (datetime.date.today() - first_dt.date()).days > keep_days:
+            if (datetime.date.today() - first_dt.date()).days > OPLOG_KEEP_DAYS:
                 self._oplog_store.remove(first_name)
                 LOG.info('Removed slice {}'.format(first_name))
 

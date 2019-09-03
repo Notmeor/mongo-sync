@@ -17,15 +17,12 @@ from mongo_sync.utils import (timeit, dt2ts, ts2localtime, ts_to_slice_name,
 from mongo_sync.store import OplogStore
 from mongo_sync.config import conf
 
-LOG = logging.getLogger(__file__)
-
-src_url = conf['src_url']
-dst_url = conf['dst_url']
+LOG = logging.getLogger('oplog_replay')
 
 # TODO: ensure_index
 
 
-class OplogReader(object):
+class OplogReplay(object):
 
     def __init__(self, start=None):
 
@@ -38,7 +35,7 @@ class OplogReader(object):
         self.docman = DocManager()
 
     def _initialize_start_time(self, start):
-        start = start or conf['sync_start_time']
+        start = start or conf['replay_start_time']
         if not isinstance(start, datetime.datetime):
             raise TypeError('Expect datetime.datetime, got {}'.format(
                     type(start)))
@@ -151,7 +148,7 @@ class OplogReader(object):
 class DocManager(object):
 
     def __init__(self):
-        self.mongo = pymongo.MongoClient(dst_url)
+        self.mongo = pymongo.MongoClient(conf['dst_url'])
         self._whitelist = conf['whitelist']
         self._blacklist = conf['blacklist']
 

@@ -33,6 +33,7 @@ def slice_name_to_ts(name):
 def dt2ts(dt):
     return Timestamp(int(dt.timestamp()), 0)
 
+
 def ts2localtime(ts):
     return ts.as_datetime().astimezone()
 

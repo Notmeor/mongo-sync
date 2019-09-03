@@ -1,0 +1,94 @@
+---
+# source mongo instance uri 
+src_url: ''
+
+# target mongo instance uri
+dst_url: ''
+
+# default is `MongoOplogStore`, alternative is `LocalOplogStore`(TODO)
+oplog_store_type: MongoOplogStore
+
+# intermediary mongo instance uri
+# this can be a third mongo, or same as target mongo 
+# if target is directly writable from source
+oplog_store_url: ''
+
+# database name for oplog store
+oplog_store_db: '__oplog_store'
+
+# mongo namespaces to replay
+# either whitelist or blacklist has effect; if both set, whitelist would be used
+# regex supported, .e.g. ['test_db.test_coll', 'test_db1.*']
+whitelist: []
+
+# mongo namespaces not to replay
+blacklist: []
+
+# start time for oplog dump
+dump_start_time: 2019-01-01T00:00:00
+
+# start time for oplog replay
+replay_start_time: 2019-01-01T00:00:00
+
+# minutes between oplog dumping
+oplog_dump_interval: 10
+
+# days of oplog to keep
+keep_days: 7
+
+
+email:
+    SMTP_MAIL_FROM: 'idwzx_airflow@163.com'
+    SMTP_HOST: 'smtp.163.com'
+    SMTP_PORT: '25'
+    SMTP_STARTTLS: true
+    SMTP_SSL: false
+    SMTP_USER: 'idwzx_airflow@163.com'
+    SMTP_PASSWORD: 'idwzx20190101'
+
+
+logging:
+    version: 1
+    disable_existing_loggers: False
+    formatters:
+        simple:
+            format: "%(asctime)s - %(threadName)s - %(levelname)s - %(message)s"
+        debug:
+            format: "%(asctime)s - %(threadName)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+    
+    handlers:
+        console:
+            class: logging.StreamHandler
+            level: WARNING
+            formatter: simple
+            stream: ext://sys.stdout
+    
+        info_file_handler:
+            class: logging.handlers.RotatingFileHandler
+            level: INFO
+            formatter: debug
+            filename: info.log
+            maxBytes: 1048576 # 1MB
+            backupCount: 20
+            encoding: utf8
+    
+        error_file_handler:
+            class: logging.handlers.RotatingFileHandler
+            level: ERROR
+            formatter: simple
+            filename: errors.log
+            maxBytes: 1048576 # 1MB
+            backupCount: 20
+            encoding: utf8
+
+    loggers:
+        oplog_dump:
+            level: INFO
+            handlers: [info_file_handler, error_file_handler]
+            propagate: no
+        
+        oplog_replay:
+            level: INFO
+            handlers: [info_file_handler, error_file_handler]
+            propagate: no
+    

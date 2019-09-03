@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import os
 import datetime
 import logging
+import pickle
 
 from bson import Timestamp
 
-import os
-import pandas as pd
-from pystore import MongoStore as SimpleFrameMongo
+from mongo_sync.mongo_store import MongoStore
 
 from mongo_sync.utils import (timeit, dt2ts, ts_to_slice_name,
                               slice_name_to_ts, namespace_to_regex)
@@ -48,17 +48,17 @@ oplog_store_db = conf['oplog_store_db']
 class MongoOplogStore(OplogStore):
 
     def list_names(self):
-        with SimpleFrameMongo(store_url, oplog_store_db) as store:
+        with MongoStore(store_url, oplog_store_db) as store:
             slice_names = store.list()
         return slice_names
 
     def remove(self, slice_name):
-        with SimpleFrameMongo(store_url, oplog_store_db) as store:
+        with MongoStore(store_url, oplog_store_db) as store:
             store.delete(slice_name)
 
     def get_last_saved_ts(self):
 
-        with SimpleFrameMongo(store_url, oplog_store_db) as store:
+        with MongoStore(store_url, oplog_store_db) as store:
             slices = store.list()
             if not slices:
                 return Timestamp(
@@ -72,7 +72,7 @@ class MongoOplogStore(OplogStore):
 
     def load_oplog(self, last_ts):
 
-        with SimpleFrameMongo(store_url, oplog_store_db) as store:
+        with MongoStore(store_url, oplog_store_db) as store:
 
             last_name = ts_to_slice_name(last_ts)
             names = sorted(store.list())
@@ -92,7 +92,7 @@ class MongoOplogStore(OplogStore):
 
     def dump_oplog(self, last_ts, oplog):
 
-        with SimpleFrameMongo(store_url, oplog_store_db) as store:
+        with MongoStore(store_url, oplog_store_db) as store:
             name = '{}_{}'.format(last_ts.time, last_ts.inc)
             store.write(name, oplog)
 
@@ -106,7 +106,7 @@ class LocalOplogStore(OplogStore):
         return sorted(os.listdir(self.store_path))
 
     def remove(self, slice_name):
-        pass
+        raise NotImplementedError
 
     def get_last_saved_ts(self):
 
@@ -135,12 +135,13 @@ class LocalOplogStore(OplogStore):
         if cur_name is None:
             cur_slice = None
         else:
-            cur_slice = pd.read_pickle(os.path.join(self.store_path, last_name))
+            with open(os.path.join(self.store_path, last_name)) as f:
+                cur_slice = pickle.load(f)
 
         return cur_slice
 
     def dump_oplog(self, last_ts, oplog):
-        pass
+        raise NotImplementedError
 
 
 store_type = conf['oplog_store_type']

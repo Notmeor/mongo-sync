@@ -9,5 +9,8 @@ setup(
     author='notmeor',
     author_email='kevin.inova@gmail.com',
     description='',
-    install_requires=[]
+    entry_points={
+        'console_scripts': ['mongo-sync = mongo_sync.main:main'],
+    },
+    install_requires=['pymongo']
 )
